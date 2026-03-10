@@ -64,18 +64,26 @@
   - 84 tests total, all passing. See Section 6 for details.
 
 - **Backend integration (Phase 2)**
-  - Supabase schema for profiles, DJs, genres, media, and (stubbed) bookings.
+  - Supabase schema for profiles, DJs, genres, media, bookings, and reviews.
   - API routes for:
     - Listing/searching DJs.
     - Fetching a single DJ with related data.
     - Creating/updating DJ profile from onboarding (including profile photo upload).
     - Creating booking requests tied to a host and DJ.
+  - **Payment processing (Stripe)**:
+    - Stripe Checkout integration for booking payments (host pays upon DJ acceptance).
+    - `POST /api/checkout` to create a Stripe Checkout session linked to a booking.
+    - `POST /api/webhooks/stripe` webhook handler for payment confirmation events.
+  - **Email notifications (SendGrid)**:
+    - Transactional emails triggered server-side from existing API routes:
+      - DJ onboarding welcome email (after completing the wizard).
+      - Host welcome email (after first sign-up).
+      - New booking request notification (sent to DJ).
+      - Booking accepted/declined notification (sent to host).
 
 #### 2.2 Out of scope (later phases)
 
 - Full booking lifecycle UX (availability checking, conflict detection, calendar views).
-- Real payment processing and escrow (e.g., Stripe).
-- Real-time messaging (Supabase Realtime) and notifications.
 - Reviews CRUD UI (writing/editing/deleting reviews), advanced analytics.
 - Admin tools / moderation dashboards.
 
@@ -376,6 +384,8 @@ Playwright auto-starts the Next.js dev server via the `webServer` config.
 - `bookings` (Phase 2)
   - `host_id`, `dj_id`, `event_date`, `start_time`, `end_time`, `notes`.
   - `status` (`pending | accepted | declined | confirmed | cancelled`).
+  - `payment_status` (`unpaid | pending | paid | refunded`).
+  - `stripe_session_id` (nullable text) - Stripe Checkout session ID for payment tracking.
 
 - `reviews` (Phase 2+)
   - `id` (UUID) - PK.
@@ -655,6 +665,69 @@ export async function GET(req: NextRequest) {
   - `403` if booking does not belong to this host or is not confirmed.
   - `422` for validation errors.
 
+#### 8.8 Create checkout session - `POST /api/checkout`
+
+**Purpose**: Create a Stripe Checkout session so a host can pay for a booking after the DJ accepts.
+
+- **Auth**: User must be logged in as `role = 'host'`.
+
+- **Request body**:
+  - `bookingId: string` - the accepted booking to pay for.
+
+- **Behavior**:
+  - Validate that the booking exists, belongs to this host, and has `status = 'accepted'`.
+  - Look up the DJ's `price_per_hour` and the booking's duration to compute the total.
+  - Create a Stripe Checkout session with:
+    - Line item: DJ service for the event (name, amount, quantity).
+    - `success_url`: redirect back to `/djs/:id?booking=confirmed`.
+    - `cancel_url`: redirect back to `/djs/:id?booking=cancelled`.
+    - `metadata`: `{ bookingId }` for webhook correlation.
+  - Update `bookings.stripe_session_id` with the session ID.
+  - Update `bookings.payment_status` to `'pending'`.
+  - Return the Checkout session URL for client-side redirect.
+
+- **Responses**:
+  - `200` with `{ url: string }` (Stripe Checkout URL).
+  - `401` if not authenticated.
+  - `403` if booking does not belong to this host.
+  - `422` if booking is not in `accepted` status.
+  - `500` on Stripe or Supabase error.
+
+#### 8.9 Stripe webhook - `POST /api/webhooks/stripe`
+
+**Purpose**: Receive Stripe events to confirm payment and update booking status.
+
+- **Auth**: Verified via Stripe webhook signature (`stripe.webhooks.constructEvent`). No Supabase session required.
+
+- **Handled events**:
+  - `checkout.session.completed`:
+    - Extract `bookingId` from session `metadata`.
+    - Update `bookings.status` to `'confirmed'` and `bookings.payment_status` to `'paid'`.
+    - Trigger a SendGrid confirmation email to both host and DJ.
+  - `checkout.session.expired`:
+    - Reset `bookings.payment_status` to `'unpaid'`.
+
+- **Response**:
+  - `200` with `{ received: true }` for all events (Stripe expects a 2xx).
+  - `400` if signature verification fails.
+
+#### 8.10 Email notifications (SendGrid)
+
+Transactional emails are sent server-side from existing API routes using the SendGrid SDK (`@sendgrid/mail`). No dedicated email endpoint is needed.
+
+| Trigger | Sent from | Recipient | Email content |
+|---------|-----------|-----------|---------------|
+| DJ completes onboarding | `POST /api/dj-profile` | DJ | Welcome email with profile link |
+| Host signs up | Supabase Auth webhook or first API call | Host | Welcome email with search link |
+| New booking request | `POST /api/bookings` | DJ | Booking details, accept/decline link |
+| Booking accepted | (future) `PATCH /api/bookings/:id` | Host | Confirmation + payment link |
+| Booking declined | (future) `PATCH /api/bookings/:id` | Host | Notification with suggestion to try other DJs |
+| Payment confirmed | `POST /api/webhooks/stripe` | Host + DJ | Receipt and event confirmation |
+
+Environment variables required:
+- `SENDGRID_API_KEY` - SendGrid API key (server-side only, never in client bundle).
+- `SENDGRID_FROM_EMAIL` - verified sender address (e.g., `noreply@cornerlist.com`).
+
 ---
 
 ### 9. Frontend-API interaction summary
@@ -671,6 +744,7 @@ export async function GET(req: NextRequest) {
   - Phase 1 (implemented): uses `getDjById` from `@/features/search` and `getReviewsByDjId` from `@/features/dj-profile` for mock data lookup by ID.
   - Phase 2: uses server-side data fetching from `GET /api/djs/:id`.
   - "Request booking" form posts to `POST /api/bookings`.
+  - After a DJ accepts a booking, the host sees a "Pay now" button that calls `POST /api/checkout` and redirects to Stripe Checkout. On success, the page reloads with a confirmed booking state.
 
 - **DJ onboarding (`/join-dj`)**
   - Phase 1 (implemented): React local state for all 4 steps; profile photo stored as data URL in memory; on "Finish" shows a success screen with profile summary.
@@ -739,11 +813,15 @@ import type { SearchParams } from "@/features/search";
    - Set up three-layer testing (Vitest + RTL + Playwright): 84 tests, all passing.
    - Delivered: 12 UI components, 6 mock DJs, 10 mock reviews, `filterDjs` utility, `StepIndicator`, full `JoinDjWizard` with 4-step flow and photo upload.
 
-2. **Phase 2 - Data model + APIs**
+2. **Phase 2 - Data model + APIs + Payments + Emails**
    - Create Supabase schema for `profiles`, `dj_profiles`, `genres`, `dj_genres`, `media_assets`, `bookings`, and `reviews`.
    - Implement `GET /api/djs`, `GET /api/djs/:id`, `POST /api/dj-profile`, `POST /api/dj-media`, and `POST /api/bookings`.
    - Wire UI components to these endpoints (search, profile, onboarding with photo upload).
    - Replace mock data imports with API calls; add TanStack Query for caching.
+   - Integrate Stripe: `POST /api/checkout` for Checkout sessions, `POST /api/webhooks/stripe` for payment confirmation.
+   - Integrate SendGrid: transactional emails for DJ/host onboarding welcome, booking request/accept/decline notifications, and payment confirmation receipts.
 
 3. **Phase 3 - Enhancements**
-   - Add messaging, advanced reviews UI, notifications (email), and real payments as separate PRDs.
+   - Advanced reviews UI (writing/editing/deleting reviews).
+   - Admin tools and moderation dashboards.
+   - Analytics and reporting.
