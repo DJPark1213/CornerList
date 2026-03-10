@@ -1,0 +1,48 @@
+---
+description: Project orchestrator — provides global context for CornerList so all AI interactions align with the stack, architecture, and current phase.
+alwaysApply: true
+---
+
+# CornerList Project Overview
+
+## Stack
+
+Next.js 16 (App Router), TypeScript, Tailwind CSS v4, Supabase (Auth, Postgres, Storage). Deployed on Vercel.
+
+## Architecture
+
+Feature-based folder structure with barrel exports:
+
+```
+src/
+  app/              Next.js routes (/, /search, /djs/[id], /join-dj)
+  components/       Shared UI (Navbar) — barrel-exported via index.ts
+  features/
+    search/         components/, data/, utils/, __tests__/
+    dj-profile/     components/, data/, __tests__/
+    join-dj/        components/, __tests__/
+  types/            Shared TS types (Genre, Dj, Review)
+e2e/                Playwright specs
+```
+
+## Import convention
+
+Always import from barrel exports, never deep paths:
+
+```ts
+import { SearchHero, MOCK_DJS } from "@/features/search";
+import { Navbar } from "@/components";
+import { Genre, Dj } from "@/types";
+```
+
+## Data colocation
+
+Mock data lives inside the owning feature (`features/search/data/`, `features/dj-profile/data/`). Utilities live in `features/*/utils/`. Cross-feature access goes through barrel exports.
+
+## Requirements
+
+`cornerlist-mvp-prd.md` is the source of truth for all product requirements, data model, and API contracts.
+
+## Current phase
+
+Phase 1 (UI + testing) is **complete** — 12 components, 84 tests passing. Phase 2 (Supabase backend + API routes) is next.

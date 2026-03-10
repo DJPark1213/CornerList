@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState } from "react";
 import { Genre } from "@/types/dj";
 import StepIndicator from "./StepIndicator";
@@ -91,9 +92,12 @@ export default function JoinDjWizard() {
         <div className="mx-auto mt-8 max-w-sm rounded-xl border border-border bg-surface p-5 text-left">
           <div className="flex items-start gap-3">
             {form.profileImage ? (
-              <img
+              <Image
                 src={form.profileImage}
                 alt="Profile"
+                width={56}
+                height={56}
+                unoptimized
                 className="h-14 w-14 shrink-0 rounded-full object-cover"
               />
             ) : (
@@ -253,9 +257,12 @@ export default function JoinDjWizard() {
                 {/* Preview */}
                 <div className="relative">
                   {form.profileImage ? (
-                    <img
+                    <Image
                       src={form.profileImage}
                       alt="Profile preview"
+                      width={144}
+                      height={144}
+                      unoptimized
                       className="h-36 w-36 rounded-full border-2 border-primary/40 object-cover shadow-lg shadow-primary/20"
                     />
                   ) : (
@@ -324,9 +331,12 @@ export default function JoinDjWizard() {
               <div className="rounded-xl border border-border bg-background p-4">
                 <div className="flex items-start gap-3">
                   {form.profileImage ? (
-                    <img
+                    <Image
                       src={form.profileImage}
                       alt="Preview"
+                      width={48}
+                      height={48}
+                      unoptimized
                       className="h-12 w-12 shrink-0 rounded-full object-cover"
                     />
                   ) : (

@@ -1,0 +1,46 @@
+---
+description: React/UI specialist — enforces component quality, dark theme consistency, and Next.js best practices for all TSX files.
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# React Component Conventions
+
+## Component structure
+
+- Functional components only — no class components.
+- Page components (`app/**/page.tsx`): use `export default function`.
+- Feature components: named exports preferred, registered in the feature's `index.ts` barrel.
+- Add `"use client"` directive at the top of any component using hooks, state, or event handlers.
+
+## Next.js primitives
+
+- Use `next/image` (`<Image>`) instead of `<img>`. Set `unoptimized` for data URLs.
+- Use `next/link` (`<Link>`) for internal navigation instead of `<a>`.
+
+## Dark theme (globals.css tokens)
+
+All colors come from CSS variables — never hardcode hex values:
+
+| Token | Variable | Use as |
+|-------|----------|--------|
+| background | `#0a0a0f` | `bg-background` |
+| surface | `#12121a` | `bg-surface` |
+| surface-light | `#1a1a2e` | `bg-surface-light` |
+| border | `#2a2a3e` | `border-border` |
+| foreground | `#e8e8f0` | `text-foreground` |
+| muted | `#8888a0` | `text-muted` |
+| primary | `#6366f1` | `bg-primary`, `text-primary` |
+| accent | `#a78bfa` | `text-accent` |
+| danger | `#ef4444` | `text-danger` |
+| star | `#fbbf24` | `text-star` |
+
+## Styling
+
+- Tailwind utility classes only — no inline `style` attributes.
+- No hardcoded color hex values in JSX.
+
+## File placement
+
+- Feature components: `src/features/<feature>/components/` and export from `src/features/<feature>/index.ts`.
+- Shared/layout components: `src/components/` and export from `src/components/index.ts`.

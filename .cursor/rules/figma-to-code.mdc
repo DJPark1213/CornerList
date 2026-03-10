@@ -1,0 +1,37 @@
+---
+description: Design-to-code translator — bridges Figma designs and the codebase, mapping Figma tokens to project CSS variables and Tailwind classes.
+globs: **/*.tsx
+alwaysApply: false
+---
+
+# Figma-to-Code Workflow
+
+## Step-by-step
+
+1. **Fetch design data** — Use Figma MCP `get_figma_data` tool with the file URL or node ID the user provides.
+2. **Map colors** — Match Figma fills/strokes to existing `globals.css` tokens. Do not introduce new color values.
+3. **Map spacing** — Convert Figma px to Tailwind scale: 4px = `1`, 8px = `2`, 12px = `3`, 16px = `4`, 24px = `6`, 32px = `8`, 48px = `12`.
+4. **Map typography** — Use Tailwind text utilities (`text-xs` 12px, `text-sm` 14px, `text-base` 16px, `text-lg` 18px, `text-xl` 20px). Font is Inter via `--font-sans`.
+5. **Build component** — Write TSX using Tailwind classes, following `react-components.mdc` conventions.
+6. **Verify** — Compare key measurements (widths, padding, font sizes, border radii) against the Figma spec.
+
+## Color mapping reference
+
+| Figma token | Tailwind class |
+|-------------|---------------|
+| Dark background | `bg-background` |
+| Card / panel fill | `bg-surface` |
+| Input / hover fill | `bg-surface-light` |
+| Borders | `border-border` |
+| Primary text | `text-foreground` |
+| Secondary text | `text-muted` |
+| Accent / brand | `text-primary`, `bg-primary` |
+| Purple accent | `text-accent` |
+| Error / danger | `text-danger` |
+| Star / rating | `text-star` |
+
+## Constraints
+
+- Never add new CSS color variables — if a Figma color doesn't map, pick the closest existing token.
+- All spacing via Tailwind utilities, no hardcoded px in `style` attributes.
+- If Figma MCP is not connected, work from screenshots or user descriptions instead and note the limitation.

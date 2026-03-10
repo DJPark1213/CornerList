@@ -1,0 +1,57 @@
+---
+description: Testing specialist — covers unit, component (Vitest + RTL), and E2E (Playwright) test conventions.
+globs: src/**/*.test.{ts,tsx}, e2e/**/*.spec.ts
+alwaysApply: false
+---
+
+# Testing Conventions
+
+## Three-layer strategy
+
+| Layer | Tool | Location | Naming |
+|-------|------|----------|--------|
+| Unit | Vitest | `features/<f>/__tests__/<name>.test.ts` | Pure functions, data helpers |
+| Component | Vitest + RTL | `features/<f>/__tests__/<Component>.test.tsx` | React components |
+| E2E | Playwright | `e2e/<feature>.spec.ts` | Full browser flows |
+
+## Unit & component tests (Vitest)
+
+Mock `next/navigation`:
+
+```ts
+vi.mock("next/navigation", () => ({
+  useRouter: vi.fn(() => ({ push: vi.fn() })),
+  usePathname: vi.fn(() => "/"),
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
+```
+
+Mock `next/link`:
+
+```ts
+vi.mock("next/link", () => ({
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+```
+
+- Prefer `screen.getByRole`, `screen.getByText`, `screen.getByPlaceholderText` over `querySelector`.
+- Import from barrel exports in tests: `import { DjCard } from "@/features/search"`.
+
+## E2E tests (Playwright)
+
+- Use `page.getByRole()` and `page.getByText("text", { exact: true })` to avoid strict mode violations.
+- One spec file per route/feature.
+- Playwright auto-starts the dev server via `webServer` config — do not start `npm run dev` manually.
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm test` | Unit + component (Vitest) |
+| `npm run test:watch` | Vitest watch mode |
+| `npm run test:e2e` | E2E (Playwright) |
+| `npm run test:all` | Full suite |
+
+## Baseline
+
+65 Vitest + 19 Playwright = 84 tests, all passing. Do not regress.
