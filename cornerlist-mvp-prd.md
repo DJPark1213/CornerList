@@ -825,3 +825,13 @@ import type { SearchParams } from "@/features/search";
    - Advanced reviews UI (writing/editing/deleting reviews).
    - Admin tools and moderation dashboards.
    - Analytics and reporting.
+
+4. **Phase 4 - React Native Mobile App**
+   - **Framework**: React Native with Expo (managed workflow) targeting both iOS and Android.
+   - **Code sharing**: reuse shared TypeScript types (`src/types/`) and API client logic from the web app. UI is built natively with React Native components (no web component reuse).
+   - **Navigation**: React Navigation with stack and tab navigators mirroring the web routes (Home/Search, DJ Profile, Booking, Onboarding).
+   - **Auth**: Supabase Auth via `@supabase/supabase-js` with the same Google OAuth + email/password flows, using native auth UI.
+   - **Payments**: Stripe integration via `@stripe/stripe-react-native` for in-app booking payments.
+   - **Push notifications**: Expo Notifications (or Firebase Cloud Messaging) for booking requests, acceptance/decline alerts, and payment confirmations -- complementing the SendGrid emails from Phase 2.
+   - **Key screens**: Home + search, DJ profile + booking, DJ onboarding wizard with camera/gallery photo upload, settings/profile management.
+   - **Deployment**: EAS Build for app binaries, distributed via Apple App Store and Google Play Store.
