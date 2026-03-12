@@ -48,8 +48,8 @@ export default function SearchHero() {
           for Your Event.
         </h1>
         <p className="mt-4 max-w-xl text-base text-muted md:text-lg">
-          Discover verified DJs for weddings, parties, formals, and campus
-          events in Charlottesville.
+          Discover verified DJs for frat parties, bar nights, formals, and
+          campus events in Charlottesville.
         </p>
 
         {/* Airbnb-style search bar */}

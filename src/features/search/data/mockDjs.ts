@@ -40,7 +40,7 @@ export const MOCK_DJS: Dj[] = [
     ratingCount: 89,
     genres: ["EDM", "Hip-Hop", "Pop"],
     about:
-      "Versatile DJ with 7 years of professional experience. From weddings to warehouse parties, I adapt my sound to the crowd. UVA alum who knows the local scene inside and out.",
+      "Versatile DJ with 7 years of professional experience. From frat basements to bar takeovers, I adapt my sound to the crowd. UVA alum who knows the local scene inside and out.",
     equipmentSummary:
       "CDJ-3000 x2, DJM-900NXS2, full PA system with subs, professional lighting rig",
     availabilitySummary: "Available most days, book 2 weeks in advance",
