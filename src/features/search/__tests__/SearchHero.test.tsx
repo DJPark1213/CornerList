@@ -23,7 +23,6 @@ describe("SearchHero", () => {
   it("renders search input fields", () => {
     render(<SearchHero />);
     expect(screen.getByPlaceholderText("Search by name...")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Max $/hr")).toBeInTheDocument();
     expect(screen.getByLabelText("Search")).toBeInTheDocument();
   });
 

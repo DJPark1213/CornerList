@@ -26,12 +26,12 @@
     - External auth UIs: Google sign-in/sign-up screens and email confirmation flows from Supabase Auth.
 
 - **Search & discovery** (Phase 1 complete)
-  - **Home page (`/`)**: hero section with an Airbnb-style search bar containing three segments side by side in a rounded pill:
+  - **Home page (`/`)**: hero section with an Airbnb-style search bar in a rounded pill:
     - **DJ or Genre** - text input for name + dropdown for genre, combined in one segment.
     - **Date** - date picker for event date.
-    - **Budget** - numeric input for max $/hr + search icon button.
-    - None of the fields are required. Clicking search (or pressing Enter) redirects to `/search` with whatever params were filled.
-  - **Search results page (`/search`)**: shows filtered DJ grid with a compact inline filter bar at the top for refining name, genre, date, and price. Filters update results and URL params in real time.
+    - **Search** - circular search button (budget / max $ per hour is **not** on the home bar; hosts set it on `/search` in the inline filter bar).
+    - None of the fields are required. Clicking search (or pressing Enter) redirects to `/search` with whatever params were filled (`q`, `genre`, `date` only from the hero).
+  - **Search results page (`/search`)**: shows filtered DJ grid with a compact inline filter bar at the top for refining name, genre, date, and **max price**. Filters update results and URL params in real time.
   - Grid of DJ cards with music note placeholders (Phase 1) showing:
     - Stage name, genres, rating, price per hour.
     - Click navigates to `/djs/[id]`.
@@ -114,17 +114,17 @@
 
 - **Header / Nav**
   - Logo / wordmark "CornerList".
-  - Links: `Join as a DJ` -> `/join-dj`, `FAQ` (stub), `Sign in` (auth placeholder).
+  - Links: `Join as a DJ` -> `/join-dj`, `FAQ` (stub), `Sign in` (Google OAuth via Supabase; signed-in users see display name/email and `Sign out`).
 
 - **Hero section**
   - Dark gradient background with headline and supporting copy.
   - Airbnb-style search bar (rounded pill shape):
     - Segment 1: "DJ or Genre" - text input + genre dropdown side by side.
     - Segment 2: "Date" - date picker.
-    - Segment 3: "Budget" - numeric input + circular search button.
+    - Segment 3: circular **Search** button only (max price / budget is set on `/search`, not in the hero).
     - Segments separated by subtle vertical dividers.
     - None of the fields are required to proceed.
-    - Clicking search or pressing Enter navigates to `/search?q=&genre=&date=&maxPrice=`.
+    - Clicking search or pressing Enter navigates to `/search` with optional `q`, `genre`, and `date` query params.
 
 - **Trending DJs**
   - Small grid (3 cards) of featured/trending DJs below the hero.

@@ -7,10 +7,9 @@ test.describe("Home page", () => {
     await expect(page.locator("text=Perfect DJ")).toBeVisible();
   });
 
-  test("has the search bar with all fields", async ({ page }) => {
+  test("has the search bar with name, genre, and date", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByPlaceholder("Search by name...")).toBeVisible();
-    await expect(page.getByPlaceholder("Max $/hr")).toBeVisible();
     await expect(page.getByLabel("Search")).toBeVisible();
   });
 
