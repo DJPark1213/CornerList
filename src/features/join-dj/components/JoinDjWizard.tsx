@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Genre } from "@/types/dj";
+import { GENRE_DISPLAY_TO_SLUG } from "@/lib/genre-slugs";
 import StepIndicator from "./StepIndicator";
 
 const ALL_GENRES: Genre[] = [
@@ -27,8 +29,10 @@ type FormState = {
 };
 
 export default function JoinDjWizard() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<FormState>({
     stageName: "",
@@ -73,69 +77,56 @@ export default function JoinDjWizard() {
   const next = () => setStep((s) => Math.min(s + 1, totalSteps));
   const back = () => setStep((s) => Math.max(s - 1, 1));
 
-  const handleFinish = () => {
-    setSubmitted(true);
+  const handleFinish = async () => {
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      let profileImageUrl: string | undefined;
+      if (form.profileImage?.startsWith("data:")) {
+        const blob = await fetch(form.profileImage).then((r) => r.blob());
+        const fd = new FormData();
+        fd.append("file", blob, "profile.jpg");
+        fd.append("type", "profile-photo");
+        const up = await fetch("/api/dj-media", { method: "POST", body: fd });
+        if (!up.ok) {
+          const j = (await up.json().catch(() => ({}))) as { error?: string };
+          throw new Error(j.error || "Photo upload failed");
+        }
+        const { url } = (await up.json()) as { url: string };
+        profileImageUrl = url;
+      }
+
+      const genreSlugs = form.genres.map((g) => GENRE_DISPLAY_TO_SLUG[g]);
+
+      const res = await fetch("/api/dj-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stageName: form.stageName,
+          yearsExperience: form.yearsExperience
+            ? Number(form.yearsExperience)
+            : undefined,
+          genres: genreSlugs,
+          pricePerHour: Number(form.pricePerHour),
+          contactEmail: form.contactEmail,
+          about: form.about || undefined,
+          profileImageUrl: profileImageUrl ?? null,
+        }),
+      });
+
+      if (!res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error || "Could not save profile");
+      }
+
+      const { djProfileId } = (await res.json()) as { djProfileId: string };
+      router.push(`/djs/${djProfileId}`);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
   };
-
-  if (submitted) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-        <div className="text-5xl">🎉</div>
-        <h2 className="mt-4 text-2xl font-bold text-foreground">
-          Welcome to CornerList!
-        </h2>
-        <p className="mt-2 text-muted">
-          Your DJ profile has been saved (mock). Once we connect the backend,
-          hosts will be able to find and book you.
-        </p>
-
-        <div className="mx-auto mt-8 max-w-sm rounded-xl border border-border bg-surface p-5 text-left">
-          <div className="flex items-start gap-3">
-            {form.profileImage ? (
-              <Image
-                src={form.profileImage}
-                alt="Profile"
-                width={56}
-                height={56}
-                unoptimized
-                className="h-14 w-14 shrink-0 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary/20 text-xl text-primary">
-                ♪
-              </div>
-            )}
-            <div>
-              <h3 className="text-lg font-semibold text-foreground">
-                {form.stageName}
-              </h3>
-              <p className="mt-1 text-sm text-muted">
-                {form.yearsExperience
-                  ? `${form.yearsExperience} years experience`
-                  : "Experience not set"}{" "}
-                · ${form.pricePerHour || "0"}/hr
-              </p>
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-1">
-            {form.genres.map((g) => (
-              <span
-                key={g}
-                className="rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary-hover"
-              >
-                {g}
-              </span>
-            ))}
-          </div>
-          {form.about && (
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              {form.about}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
@@ -154,6 +145,15 @@ export default function JoinDjWizard() {
           labels={["Basics", "Style & Rate", "Photo", "Bio & Preview"]}
         />
       </div>
+
+      {submitError && (
+        <p
+          className="mb-4 rounded-lg border border-danger/40 bg-danger/10 px-3 py-2 text-sm text-danger"
+          role="alert"
+        >
+          {submitError}
+        </p>
+      )}
 
       <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
         {/* Step 1: Basics */}
@@ -392,11 +392,18 @@ export default function JoinDjWizard() {
           </button>
           <button
             type="button"
-            onClick={step === totalSteps ? handleFinish : next}
-            disabled={!canProceed()}
+            onClick={() => {
+              if (step === totalSteps) void handleFinish();
+              else next();
+            }}
+            disabled={!canProceed() || submitting}
             className="rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition-all hover:bg-primary-hover disabled:opacity-40 disabled:shadow-none"
           >
-            {step === totalSteps ? "Finish" : "Next"}
+            {step === totalSteps
+              ? submitting
+                ? "Saving…"
+                : "Finish"
+              : "Next"}
           </button>
         </div>
       </div>

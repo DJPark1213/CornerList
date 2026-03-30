@@ -1,7 +1,8 @@
-import { SearchHero, DjGrid, MOCK_DJS } from "@/features/search";
+import { SearchHero, DjGrid } from "@/features/search";
+import { listDjs } from "@/lib/data/djs";
 
-export default function HomePage() {
-  const featured = MOCK_DJS.slice(0, 3);
+export default async function HomePage() {
+  const { djs: featured } = await listDjs({ limit: 3 });
 
   return (
     <main>

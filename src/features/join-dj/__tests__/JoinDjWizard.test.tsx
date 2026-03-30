@@ -1,9 +1,29 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import JoinDjWizard from "../components/JoinDjWizard";
 
+const push = vi.fn();
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push,
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
 describe("JoinDjWizard", () => {
+  beforeEach(() => {
+    push.mockClear();
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        djProfileId: "00000000-0000-0000-0000-000000000001",
+      }),
+    });
+  });
+
   it("renders step 1 by default", () => {
     render(<JoinDjWizard />);
     expect(screen.getByText("Join CornerList as a DJ")).toBeInTheDocument();
@@ -83,30 +103,27 @@ describe("JoinDjWizard", () => {
     expect(screen.getByPlaceholderText("e.g. DJ Mike Beats")).toBeInTheDocument();
   });
 
-  it("completes the full wizard and shows success screen", async () => {
+  it("completes the full wizard and navigates to the new DJ profile", async () => {
     const user = userEvent.setup();
     render(<JoinDjWizard />);
 
-    // Step 1
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Flow");
     await user.type(screen.getByPlaceholderText("your@email.com"), "dj@flow.com");
     await user.click(screen.getByText("Next"));
 
-    // Step 2
     await user.click(screen.getByText("Pop"));
     await user.type(screen.getByPlaceholderText("e.g. 150"), "100");
     await user.click(screen.getByText("Next"));
 
-    // Step 3 (skip photo)
     await user.click(screen.getByText("Next"));
 
-    // Step 4
     expect(screen.getByText("Finish")).toBeInTheDocument();
     await user.click(screen.getByText("Finish"));
 
-    // Success screen
-    expect(screen.getByText("Welcome to CornerList!")).toBeInTheDocument();
-    expect(screen.getByText("DJ Flow")).toBeInTheDocument();
-    expect(screen.getByText("Pop")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(push).toHaveBeenCalledWith(
+        "/djs/00000000-0000-0000-0000-000000000001"
+      );
+    });
   });
 });
