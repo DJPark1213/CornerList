@@ -20,14 +20,12 @@ export default function SearchHero() {
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<Genre | "">("");
   const [eventDate, setEventDate] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (genre) params.set("genre", genre);
     if (eventDate) params.set("date", eventDate);
-    if (maxPrice) params.set("maxPrice", maxPrice);
     router.push(`/search?${params.toString()}`);
   };
 
@@ -52,7 +50,7 @@ export default function SearchHero() {
           campus events in Charlottesville.
         </p>
 
-        {/* Airbnb-style search bar */}
+        {/* Airbnb-style search bar (budget filter lives on /search only) */}
         <div className="mt-8 overflow-hidden rounded-full border border-border bg-surface shadow-2xl shadow-black/40 md:flex">
           {/* Name / Genre */}
           <div className="flex-1 border-b border-border px-5 py-3 md:border-b-0 md:border-r">
@@ -84,36 +82,25 @@ export default function SearchHero() {
           </div>
 
           {/* Date */}
-          <div className="flex-1 border-b border-border px-5 py-3 md:border-b-0 md:border-r">
-            <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted">
-              Date
-            </label>
-            <input
-              type="date"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="mt-0.5 w-full bg-transparent text-sm text-foreground outline-none"
-            />
-          </div>
-
-          {/* Budget */}
-          <div className="flex items-center gap-2 px-5 py-3">
-            <div className="flex-1">
+          <div className="flex flex-1 items-center border-b border-border px-5 py-3 md:border-b-0 md:border-r">
+            <div className="min-w-0 flex-1">
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted">
-                Budget
+                Date
               </label>
               <input
-                type="number"
-                min={0}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
+                type="date"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Max $/hr"
-                className="mt-0.5 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted/50"
+                className="mt-0.5 w-full bg-transparent text-sm text-foreground outline-none"
               />
             </div>
+          </div>
+
+          {/* Search */}
+          <div className="flex items-center justify-center px-4 py-3 md:justify-end">
             <button
+              type="button"
               onClick={handleSearch}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-white shadow-lg shadow-primary/30 transition-all hover:bg-primary-hover hover:shadow-primary/50"
               aria-label="Search"

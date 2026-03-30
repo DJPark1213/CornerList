@@ -1,10 +1,67 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
+
+function getAvatarUrl(user: User): string | null {
+  const m = user.user_metadata;
+  if (!m || typeof m !== "object") return null;
+  const picture = (m as { picture?: unknown; avatar_url?: unknown }).picture;
+  const avatarUrl = (m as { picture?: unknown; avatar_url?: unknown })
+    .avatar_url;
+  const url =
+    typeof picture === "string" && picture.length > 0
+      ? picture
+      : typeof avatarUrl === "string" && avatarUrl.length > 0
+        ? avatarUrl
+        : null;
+  return url;
+}
+
+function getInitials(displayName: string, email: string | undefined): string {
+  const parts = displayName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const a = parts[0][0];
+    const b = parts[parts.length - 1][0];
+    if (a && b) return (a + b).toUpperCase();
+  }
+  if (parts.length === 1 && parts[0].length >= 2) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  if (email && email.length >= 2) {
+    return email.slice(0, 2).toUpperCase();
+  }
+  return "?";
+}
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const init = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user ?? null);
+      setLoading(false);
+    };
+
+    void init();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const linkClass = (href: string) =>
     `text-sm transition-colors ${
@@ -12,6 +69,39 @@ export default function Navbar() {
         ? "text-foreground font-medium"
         : "text-muted hover:text-foreground"
     }`;
+
+  const handleSignIn = async () => {
+    const supabase = createClient();
+    const origin = window.location.origin;
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/auth/callback`,
+      },
+    });
+  };
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+  };
+
+  const displayName =
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    user?.email ??
+    "Account";
+
+  const avatarUrl = user ? getAvatarUrl(user) : null;
+  const initials = user
+    ? getInitials(
+        String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? ""),
+        user.email ?? undefined
+      )
+    : "?";
+
+  const showName =
+    displayName && displayName !== "Account" ? displayName : null;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -31,9 +121,53 @@ export default function Navbar() {
           <Link href="/#" className="text-sm text-muted hover:text-foreground">
             FAQ
           </Link>
-          <button className="rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary">
-            Sign in
-          </button>
+          {loading ? (
+            <span className="h-9 w-24 animate-pulse rounded-full bg-surface-light" />
+          ) : user ? (
+            <div className="flex items-center gap-2 sm:gap-3">
+              {avatarUrl ? (
+                <Image
+                  src={avatarUrl}
+                  alt={showName ? `${showName} profile photo` : "Profile photo"}
+                  width={32}
+                  height={32}
+                  className="h-8 w-8 rounded-full border border-border object-cover"
+                  data-testid="user-avatar"
+                />
+              ) : (
+                <div
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-primary/15 text-xs font-semibold text-primary-hover"
+                  data-testid="user-avatar-fallback"
+                  aria-hidden
+                >
+                  {initials}
+                </div>
+              )}
+              {showName && (
+                <span
+                  className="hidden max-w-[120px] truncate text-sm text-muted sm:inline"
+                  title={showName}
+                >
+                  {showName}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                className="rounded-full border border-border bg-surface px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary sm:px-4"
+              >
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => void handleSignIn()}
+              className="rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              Sign in
+            </button>
+          )}
         </nav>
       </div>
     </header>
