@@ -86,7 +86,7 @@ export default function BookingModal({ dj, open, onClose }: Props) {
             <select className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary">
               <option>House party</option>
               <option>Formal</option>
-              <option>Wedding</option>
+              <option>Bar event</option>
               <option>Campus event</option>
               <option>Other</option>
             </select>
