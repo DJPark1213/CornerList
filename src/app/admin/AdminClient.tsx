@@ -73,6 +73,7 @@ export default function AdminClient({
 }) {
   const [tab, setTab] = useState<Tab>("djs");
   const [djs, setDjs] = useState(initialDjs);
+  const [userList, setUserList] = useState(users);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,6 +91,22 @@ export default function AdminClient({
       setDjs((prev) =>
         prev.map((d) => (d.id === id ? { ...d, is_active: !current } : d))
       );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const deleteUser = async (id: string, email: string | null) => {
+    if (!confirm(`Delete user ${email ?? id}? This cannot be undone.`)) return;
+    setBusyId(id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      const j = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(j.error ?? "Failed");
+      setUserList((prev) => prev.filter((u) => u.id !== id));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -271,11 +288,12 @@ export default function AdminClient({
                 <th className="pb-2 pr-4 font-medium">Name</th>
                 <th className="pb-2 pr-4 font-medium">Email</th>
                 <th className="pb-2 pr-4 font-medium">Role</th>
-                <th className="pb-2 font-medium">Joined</th>
+                <th className="pb-2 pr-4 font-medium">Joined</th>
+                <th className="pb-2 font-medium">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {users.map((u) => (
+              {userList.map((u) => (
                 <tr key={u.id} className="text-foreground">
                   <td className="py-3 pr-4">{u.full_name ?? "—"}</td>
                   <td className="py-3 pr-4 text-muted">{u.email ?? "—"}</td>
@@ -292,14 +310,26 @@ export default function AdminClient({
                       {u.role}
                     </span>
                   </td>
-                  <td className="py-3 text-muted">
+                  <td className="py-3 pr-4 text-muted">
                     {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="py-3">
+                    {u.role !== "admin" && (
+                      <button
+                        type="button"
+                        disabled={busyId === u.id}
+                        onClick={() => void deleteUser(u.id, u.email)}
+                        className="rounded-lg border border-danger/40 px-3 py-1 text-xs font-medium text-danger hover:bg-danger/10 disabled:opacity-50"
+                      >
+                        {busyId === u.id ? "…" : "Delete"}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {users.length === 0 && (
+          {userList.length === 0 && (
             <p className="mt-6 text-center text-sm text-muted">No users yet.</p>
           )}
         </div>
