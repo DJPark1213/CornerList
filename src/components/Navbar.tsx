@@ -136,7 +136,7 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-6">
-          {user && role !== "dj" && (
+          {user && role !== "dj" && role !== "admin" && (
             <Link href="/bookings" className={linkClass("/bookings")}>
               My Bookings
             </Link>
@@ -151,7 +151,12 @@ export default function Navbar() {
               )}
             </Link>
           )}
-          {role !== "dj" && (
+          {role === "admin" && (
+            <Link href="/admin" className={linkClass("/admin")}>
+              Admin
+            </Link>
+          )}
+          {role !== "dj" && role !== "admin" && (
             <Link href="/join-dj" className={linkClass("/join-dj")}>
               Join as a DJ
             </Link>
