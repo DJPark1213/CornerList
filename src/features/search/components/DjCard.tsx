@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Dj } from "@/types/dj";
 
 type Props = {
@@ -9,17 +10,29 @@ export default function DjCard({ dj }: Props) {
   return (
     <Link href={`/djs/${dj.id}`} className="group block">
       <article className="flex h-full flex-col rounded-xl border border-border bg-surface p-4 shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-1 hover:border-primary/50 hover:shadow-primary-glow">
-        {/* Image placeholder */}
         <div className="aspect-[4/3] w-full overflow-hidden rounded-lg bg-gradient-to-br from-surface-light to-background">
-          <div className="flex h-full items-center justify-center text-3xl text-muted/30">
-            ♪
-          </div>
+          {dj.avatarUrl ? (
+            <Image
+              src={dj.avatarUrl}
+              alt={dj.stageName}
+              width={400}
+              height={300}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-3xl text-muted/30">
+              ♪
+            </div>
+          )}
         </div>
 
         <div className="mt-3 flex-1">
           <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors">
             {dj.stageName}
           </h3>
+          {dj.location && (
+            <p className="mt-0.5 text-xs text-muted">📍 {dj.location}</p>
+          )}
           <div className="mt-1 flex flex-wrap gap-1">
             {dj.genres.map((g) => (
               <span

@@ -41,6 +41,8 @@ function getInitials(displayName: string, email: string | undefined): string {
 export default function Navbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,7 +50,24 @@ export default function Navbar() {
 
     const init = async () => {
       const { data } = await supabase.auth.getUser();
-      setUser(data.user ?? null);
+      const u = data.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", u.id)
+          .maybeSingle();
+        const r = prof?.role ?? null;
+        setRole(r);
+
+        if (r === "dj") {
+          const res = await fetch("/api/bookings?asDj=1");
+          const j = (await res.json()) as { bookings?: { status: string }[] };
+          const count = (j.bookings ?? []).filter((b) => b.status === "pending").length;
+          setPendingCount(count);
+        }
+      }
       setLoading(false);
     };
 
@@ -57,7 +76,9 @@ export default function Navbar() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (!u) { setRole(null); setPendingCount(0); }
     });
 
     return () => subscription.unsubscribe();
@@ -115,10 +136,27 @@ export default function Navbar() {
         </Link>
 
         <nav className="flex items-center gap-6">
-          <Link href="/join-dj" className={linkClass("/join-dj")}>
-            Join as a DJ
-          </Link>
-          <Link href="/#" className="text-sm text-muted hover:text-foreground">
+          {user && role !== "dj" && (
+            <Link href="/bookings" className={linkClass("/bookings")}>
+              My Bookings
+            </Link>
+          )}
+          {role === "dj" && (
+            <Link href="/djs/me" className={`relative ${linkClass("/djs/me")}`}>
+              My Profile
+              {pendingCount > 0 && (
+                <span className="absolute -right-3.5 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white">
+                  {pendingCount}
+                </span>
+              )}
+            </Link>
+          )}
+          {role !== "dj" && (
+            <Link href="/join-dj" className={linkClass("/join-dj")}>
+              Join as a DJ
+            </Link>
+          )}
+          <Link href="/faq" className={linkClass("/faq")}>
             FAQ
           </Link>
           {loading ? (

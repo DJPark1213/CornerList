@@ -19,6 +19,7 @@ export type SearchParams = {
   genre: Genre | "";
   date: string;
   maxPrice: string;
+  location: string;
 };
 
 type Props = {
@@ -43,6 +44,7 @@ export default function SearchResultsBar({
     if (next.genre) sp.set("genre", next.genre);
     if (next.date) sp.set("date", next.date);
     if (next.maxPrice) sp.set("maxPrice", next.maxPrice);
+    if (next.location) sp.set("location", next.location);
     router.replace(`/search?${sp.toString()}`);
   };
 
@@ -76,6 +78,15 @@ export default function SearchResultsBar({
           value={params.date}
           onChange={(e) => set({ date: e.target.value })}
           className="rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-40"
+          style={{ colorScheme: "dark" }}
+        />
+
+        <input
+          type="text"
+          value={params.location}
+          onChange={(e) => set({ location: e.target.value })}
+          placeholder="Location"
+          className="rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-primary sm:w-36"
         />
 
         <input

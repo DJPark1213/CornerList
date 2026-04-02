@@ -1,39 +1,63 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Genre } from "@/types";
-import {
-  DjGrid,
-  SearchResultsBar,
-  MOCK_DJS,
-  filterDjs,
-} from "@/features/search";
+import { DjGrid, SearchResultsBar } from "@/features/search";
 import type { SearchParams } from "@/features/search";
+import type { Dj } from "@/types/dj";
 
 function SearchContent() {
   const searchParams = useSearchParams();
 
-  const [filters, setFilters] = useState<SearchParams>({
-    q: searchParams.get("q") ?? "",
-    genre: (searchParams.get("genre") as Genre) ?? "",
-    date: searchParams.get("date") ?? "",
-    maxPrice: searchParams.get("maxPrice") ?? "",
+  const filters = useMemo<SearchParams>(
+    () => ({
+      q: searchParams.get("q") ?? "",
+      genre: (searchParams.get("genre") as Genre) ?? "",
+      date: searchParams.get("date") ?? "",
+      maxPrice: searchParams.get("maxPrice") ?? "",
+      location: searchParams.get("location") ?? "",
+    }),
+    [searchParams]
+  );
+
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["djs", filters.q, filters.genre, filters.maxPrice, filters.location],
+    queryFn: async (): Promise<{ djs: Dj[] }> => {
+      const sp = new URLSearchParams();
+      if (filters.q) sp.set("q", filters.q);
+      if (filters.genre) sp.set("genre", filters.genre);
+      if (filters.maxPrice) sp.set("maxPrice", filters.maxPrice);
+      if (filters.location) sp.set("location", filters.location);
+      const res = await fetch(`/api/djs?${sp.toString()}`);
+      if (!res.ok) {
+        throw new Error("Failed to load DJs");
+      }
+      return res.json();
+    },
   });
 
-  const filtered = useMemo(() => filterDjs(MOCK_DJS, filters), [filters]);
+  const djs = data?.djs ?? [];
 
   return (
     <>
       <SearchResultsBar
         params={filters}
-        onChange={setFilters}
-        resultCount={filtered.length}
+        onChange={() => undefined}
+        resultCount={djs.length}
       />
 
       <section className="mx-auto max-w-6xl px-4 py-8">
-        <DjGrid djs={filtered} />
+        {isPending ? (
+          <div className="py-16 text-center text-muted">Loading DJs…</div>
+        ) : isError ? (
+          <div className="py-16 text-center text-destructive">
+            Something went wrong. Try again.
+          </div>
+        ) : (
+          <DjGrid djs={djs} />
+        )}
       </section>
     </>
   );

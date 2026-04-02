@@ -19,6 +19,7 @@ export type Dj = {
   about: string;
   equipmentSummary: string;
   availabilitySummary: string;
+  location: string;
   avatarUrl: string | null;
   showcaseImages: string[];
 };

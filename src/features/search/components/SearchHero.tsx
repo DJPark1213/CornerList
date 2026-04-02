@@ -20,12 +20,14 @@ export default function SearchHero() {
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<Genre | "">("");
   const [eventDate, setEventDate] = useState("");
+  const [location, setLocation] = useState("");
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (genre) params.set("genre", genre);
     if (eventDate) params.set("date", eventDate);
+    if (location) params.set("location", location);
     router.push(`/search?${params.toString()}`);
   };
 
@@ -93,6 +95,7 @@ export default function SearchHero() {
                 onChange={(e) => setEventDate(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className="mt-0.5 w-full bg-transparent text-sm text-foreground outline-none"
+                style={{ colorScheme: "dark" }}
               />
             </div>
           </div>
