@@ -127,12 +127,15 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link
-          href="/"
-          className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
-        >
-          <span className="text-primary">♪</span>
-          <span>CornerList</span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/logo.svg"
+            alt="CornerList"
+            width={120}
+            height={36}
+            priority
+            className="h-9 w-auto"
+          />
         </Link>
 
         <nav className="flex items-center gap-6">
