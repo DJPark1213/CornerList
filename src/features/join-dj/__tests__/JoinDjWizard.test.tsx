@@ -37,11 +37,12 @@ describe("JoinDjWizard", () => {
     expect(nextBtn).toBeDisabled();
   });
 
-  it("enables Next button once stage name and email are filled", async () => {
+  it("enables Next button once stage name, location and email are filled", async () => {
     const user = userEvent.setup();
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Test");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "test@test.com");
 
     expect(screen.getByText("Next")).toBeEnabled();
@@ -52,6 +53,7 @@ describe("JoinDjWizard", () => {
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Test");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "t@t.com");
     await user.click(screen.getByText("Next"));
 
@@ -69,6 +71,7 @@ describe("JoinDjWizard", () => {
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Test");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "t@t.com");
     await user.click(screen.getByText("Next"));
 
@@ -85,6 +88,7 @@ describe("JoinDjWizard", () => {
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Test");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "t@t.com");
     await user.click(screen.getByText("Next"));
 
@@ -96,6 +100,7 @@ describe("JoinDjWizard", () => {
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Test");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "t@t.com");
     await user.click(screen.getByText("Next"));
     await user.click(screen.getByText("Back"));
@@ -108,6 +113,7 @@ describe("JoinDjWizard", () => {
     render(<JoinDjWizard />);
 
     await user.type(screen.getByPlaceholderText("e.g. DJ Mike Beats"), "DJ Flow");
+    await user.type(screen.getByPlaceholderText("e.g. Charlottesville, VA"), "New York, NY");
     await user.type(screen.getByPlaceholderText("your@email.com"), "dj@flow.com");
     await user.click(screen.getByText("Next"));
 

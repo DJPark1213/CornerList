@@ -38,6 +38,7 @@ vi.mock("next/image", () => ({
 
 const mockGetUser = vi.fn();
 const mockOnAuthStateChange = vi.fn();
+const mockFrom = vi.fn();
 
 vi.mock("@/lib/supabase/client", () => ({
   createClient: () => ({
@@ -47,14 +48,28 @@ vi.mock("@/lib/supabase/client", () => ({
       signInWithOAuth: vi.fn(),
       signOut: vi.fn(),
     },
+    from: mockFrom,
   }),
 }));
+
+// Mock fetch for /api/bookings?asDj=1
+vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+  new Response(JSON.stringify({ bookings: [] }), { status: 200 })
+));
 
 describe("Navbar", () => {
   beforeEach(() => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
     mockOnAuthStateChange.mockReturnValue({
       data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    // Default: profile query returns null role
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { role: "host" } }),
+        }),
+      }),
     });
   });
 
@@ -100,6 +115,13 @@ describe("Navbar", () => {
         },
       },
     });
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { role: "host" } }),
+        }),
+      }),
+    });
     render(<Navbar />);
     await waitFor(() => {
       expect(screen.getByTestId("user-avatar")).toBeInTheDocument();
@@ -118,11 +140,16 @@ describe("Navbar", () => {
         },
       },
     });
+    mockFrom.mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValue({ data: { role: "host" } }),
+        }),
+      }),
+    });
     render(<Navbar />);
     await waitFor(() => {
-      expect(screen.getByTestId("user-avatar-fallback")).toHaveTextContent(
-        "SO"
-      );
+      expect(screen.getByTestId("user-avatar-fallback")).toHaveTextContent("SO");
       expect(screen.getByText("Sign out")).toBeInTheDocument();
     });
     expect(screen.queryByText("Sign in")).not.toBeInTheDocument();

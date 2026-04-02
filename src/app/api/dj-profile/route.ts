@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { genreParamToSlug } from "@/lib/genre-slugs";
+import { sendDjWelcomeEmail } from "@/lib/email/booking-emails";
 
 type Body = {
   stageName?: string;
@@ -11,6 +12,7 @@ type Body = {
   about?: string;
   equipmentSummary?: string;
   availabilitySummary?: string;
+  location?: string;
   profileImageUrl?: string | null;
 };
 
@@ -113,8 +115,7 @@ export async function POST(request: NextRequest) {
 
     const { error: profileUpdateErr } = await supabase
       .from("profiles")
-      .update(profilePatch)
-      .eq("id", user.id);
+      .upsert({ id: user.id, ...profilePatch }, { onConflict: "id" });
 
     if (profileUpdateErr) {
       console.error(profileUpdateErr);
@@ -132,6 +133,7 @@ export async function POST(request: NextRequest) {
       about: body.about?.trim() ?? null,
       equipment_summary: body.equipmentSummary?.trim() ?? null,
       availability_summary: body.availabilitySummary?.trim() ?? null,
+      location: body.location?.trim() ?? null,
       is_active: true,
     };
 
@@ -177,6 +179,16 @@ export async function POST(request: NextRequest) {
         { error: "Failed to link genres" },
         { status: 500 }
       );
+    }
+
+    const { data: profEmail } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profEmail?.email) {
+      void sendDjWelcomeEmail(profEmail.email, stageName);
     }
 
     return NextResponse.json({ djProfileId: djId });

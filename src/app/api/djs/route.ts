@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q");
     const genre = searchParams.get("genre");
+    const location = searchParams.get("location");
     const maxPriceRaw = searchParams.get("maxPrice");
     const limitRaw = searchParams.get("limit");
     const offsetRaw = searchParams.get("offset");
@@ -25,6 +26,7 @@ export async function GET(request: NextRequest) {
     const { djs } = await listDjs({
       q,
       genre,
+      location,
       maxPrice:
         maxPriceParsed != null && !Number.isNaN(maxPriceParsed)
           ? maxPriceParsed

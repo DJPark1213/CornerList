@@ -17,17 +17,19 @@ function SearchContent() {
       genre: (searchParams.get("genre") as Genre) ?? "",
       date: searchParams.get("date") ?? "",
       maxPrice: searchParams.get("maxPrice") ?? "",
+      location: searchParams.get("location") ?? "",
     }),
     [searchParams]
   );
 
   const { data, isPending, isError } = useQuery({
-    queryKey: ["djs", filters.q, filters.genre, filters.maxPrice],
+    queryKey: ["djs", filters.q, filters.genre, filters.maxPrice, filters.location],
     queryFn: async (): Promise<{ djs: Dj[] }> => {
       const sp = new URLSearchParams();
       if (filters.q) sp.set("q", filters.q);
       if (filters.genre) sp.set("genre", filters.genre);
       if (filters.maxPrice) sp.set("maxPrice", filters.maxPrice);
+      if (filters.location) sp.set("location", filters.location);
       const res = await fetch(`/api/djs?${sp.toString()}`);
       if (!res.ok) {
         throw new Error("Failed to load DJs");

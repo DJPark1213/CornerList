@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { Dj, Review } from "@/types/dj";
 import {
   DjProfileHeader,
+  ProfileBookingPanel,
   DjAboutSection,
   DjDetailsSection,
   DjReviewsSection,
+  ReviewForm,
   BookingModal,
 } from "@/features/dj-profile";
 
@@ -17,7 +20,10 @@ type Props = {
 };
 
 export default function DjProfilePageClient({ dj, reviews }: Props) {
+  const searchParams = useSearchParams();
+  const autoPayBookingId = searchParams.get("pay");
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [reviewList, setReviewList] = useState(reviews);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -33,6 +39,7 @@ export default function DjProfilePageClient({ dj, reviews }: Props) {
           dj={dj}
           onRequestBooking={() => setBookingOpen(true)}
         />
+        <ProfileBookingPanel dj={dj} autoPayBookingId={autoPayBookingId} />
         <DjAboutSection about={dj.about} />
         <DjDetailsSection
           equipmentSummary={dj.equipmentSummary}
@@ -65,7 +72,14 @@ export default function DjProfilePageClient({ dj, reviews }: Props) {
           </div>
         </section>
 
-        <DjReviewsSection reviews={reviews} />
+        <ReviewForm
+          djId={dj.id}
+          onReviewSubmitted={() => {
+            // Reload reviews from server by refreshing
+            window.location.reload();
+          }}
+        />
+        <DjReviewsSection reviews={reviewList} />
       </div>
 
       <BookingModal

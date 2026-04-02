@@ -20,6 +20,7 @@ type DjProfileListRow = {
   about: string | null;
   equipment_summary: string | null;
   availability_summary: string | null;
+  location: string | null;
   profiles: ProfileRow;
   dj_genres: DjGenreRow[] | null;
 };
@@ -56,6 +57,7 @@ function mapListRow(row: DjProfileListRow): Dj {
     about: row.about ?? "",
     equipmentSummary: row.equipment_summary ?? "",
     availabilitySummary: row.availability_summary ?? "",
+    location: row.location ?? "",
     avatarUrl: row.profiles?.avatar_url ?? null,
     showcaseImages: [],
   };
@@ -73,6 +75,7 @@ export type ListDjsParams = {
   q?: string | null;
   genre?: string | null;
   maxPrice?: number | null;
+  location?: string | null;
   limit?: number;
   offset?: number;
 };
@@ -118,6 +121,7 @@ export async function listDjs(params: ListDjsParams = {}): Promise<{ djs: Dj[] }
       about,
       equipment_summary,
       availability_summary,
+      location,
       profiles(avatar_url),
       dj_genres(genres(name, slug))
     `
@@ -138,6 +142,12 @@ export async function listDjs(params: ListDjsParams = {}): Promise<{ djs: Dj[] }
     query = query.or(
       `stage_name.ilike.%${safe}%,about.ilike.%${safe}%`
     );
+  }
+
+  const locationRaw = params.location?.trim();
+  if (locationRaw) {
+    const safe = locationRaw.replace(/,/g, "");
+    query = query.ilike("location", `%${safe}%`);
   }
 
   query = query
@@ -171,6 +181,7 @@ export async function getDjById(id: string): Promise<Dj | null> {
       about,
       equipment_summary,
       availability_summary,
+      location,
       profiles(avatar_url),
       dj_genres(genres(name, slug)),
       media_assets(id, type, public_url)
@@ -189,6 +200,50 @@ export async function getDjById(id: string): Promise<Dj | null> {
   }
 
   return mapDetailRow(data as unknown as DjProfileDetailRow);
+}
+
+export async function getDjByUserId(
+  userId: string
+): Promise<{ dj: Dj; contactEmail: string | null } | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("dj_profiles")
+    .select(
+      `
+      id,
+      stage_name,
+      years_experience,
+      price_per_hour,
+      rating_average,
+      rating_count,
+      about,
+      equipment_summary,
+      availability_summary,
+      location,
+      profiles(avatar_url),
+      dj_genres(genres(name, slug)),
+      media_assets(id, type, public_url)
+    `
+    )
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getDjByUserId", error);
+    throw new Error(error.message);
+  }
+  if (!data) return null;
+
+  const { data: prof } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq("id", userId)
+    .maybeSingle();
+
+  return {
+    dj: mapDetailRow(data as unknown as DjProfileDetailRow),
+    contactEmail: prof?.email ?? null,
+  };
 }
 
 export async function listReviewsForDj(djId: string): Promise<Review[]> {

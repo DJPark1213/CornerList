@@ -22,6 +22,7 @@ type FormState = {
   stageName: string;
   yearsExperience: string;
   contactEmail: string;
+  location: string;
   genres: Genre[];
   pricePerHour: string;
   about: string;
@@ -38,6 +39,7 @@ export default function JoinDjWizard() {
     stageName: "",
     yearsExperience: "",
     contactEmail: "",
+    location: "",
     genres: [],
     pricePerHour: "",
     about: "",
@@ -67,7 +69,7 @@ export default function JoinDjWizard() {
 
   const canProceed = () => {
     if (step === 1)
-      return form.stageName.trim() && form.contactEmail.trim();
+      return form.stageName.trim() && form.contactEmail.trim() && form.location.trim();
     if (step === 2)
       return form.genres.length > 0 && Number(form.pricePerHour) > 0;
     return true;
@@ -109,6 +111,7 @@ export default function JoinDjWizard() {
           genres: genreSlugs,
           pricePerHour: Number(form.pricePerHour),
           contactEmail: form.contactEmail,
+          location: form.location || undefined,
           about: form.about || undefined,
           profileImageUrl: profileImageUrl ?? null,
         }),
@@ -180,6 +183,17 @@ export default function JoinDjWizard() {
                 value={form.yearsExperience}
                 onChange={(e) => set({ yearsExperience: e.target.value })}
                 placeholder="e.g. 3"
+                className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-foreground">
+                Location <span className="text-danger">*</span>
+              </label>
+              <input
+                value={form.location}
+                onChange={(e) => set({ location: e.target.value })}
+                placeholder="e.g. Charlottesville, VA"
                 className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
               />
             </div>

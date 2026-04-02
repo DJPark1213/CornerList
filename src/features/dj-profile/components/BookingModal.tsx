@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { Dj } from "@/types/dj";
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function BookingModal({ dj, open, onClose }: Props) {
+  const [isSignedIn, setIsSignedIn] = useState<boolean | null>(null);
   const [eventDate, setEventDate] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
@@ -19,6 +21,14 @@ export default function BookingModal({ dj, open, onClose }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsSignedIn(!!data.user);
+    });
+  }, [open]);
 
   if (!open) return null;
 
@@ -61,7 +71,24 @@ export default function BookingModal({ dj, open, onClose }: Props) {
           {dj.stageName} · ${dj.pricePerHour}/hr
         </p>
 
-        {success ? (
+        {isSignedIn === false ? (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted">You need to be signed in to request a booking.</p>
+            <button
+              type="button"
+              onClick={async () => {
+                const supabase = createClient();
+                await supabase.auth.signInWithOAuth({
+                  provider: "google",
+                  options: { redirectTo: `${window.location.origin}/auth/callback` },
+                });
+              }}
+              className="mt-4 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+            >
+              Sign in with Google
+            </button>
+          </div>
+        ) : success ? (
           <p className="mt-6 text-sm text-foreground">
             Request sent. The DJ will be notified.
           </p>
@@ -118,6 +145,7 @@ export default function BookingModal({ dj, open, onClose }: Props) {
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
                 className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                style={{ colorScheme: "dark" }}
               />
             </div>
 
@@ -132,6 +160,7 @@ export default function BookingModal({ dj, open, onClose }: Props) {
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                  style={{ colorScheme: "dark" }}
                 />
               </div>
               <div>
@@ -144,6 +173,7 @@ export default function BookingModal({ dj, open, onClose }: Props) {
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
                   className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+                  style={{ colorScheme: "dark" }}
                 />
               </div>
             </div>
