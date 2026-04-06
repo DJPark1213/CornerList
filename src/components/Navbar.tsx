@@ -64,7 +64,9 @@ export default function Navbar() {
         if (r === "dj") {
           const res = await fetch("/api/bookings?asDj=1");
           const j = (await res.json()) as { bookings?: { status: string }[] };
-          const count = (j.bookings ?? []).filter((b) => b.status === "pending").length;
+          const count = (j.bookings ?? []).filter(
+            (b) => b.status === "pending",
+          ).length;
           setPendingCount(count);
         }
       }
@@ -78,7 +80,10 @@ export default function Navbar() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (!u) { setRole(null); setPendingCount(0); }
+      if (!u) {
+        setRole(null);
+        setPendingCount(0);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -117,7 +122,7 @@ export default function Navbar() {
   const initials = user
     ? getInitials(
         String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? ""),
-        user.email ?? undefined
+        user.email ?? undefined,
       )
     : "?";
 
@@ -127,16 +132,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo.svg"
-            alt="CornerList"
-            width={40}
-            height={40}
-            priority
-            className="h-10 w-10 rounded"
-          />
-          <span className="text-lg font-bold tracking-tight text-foreground">CornerList</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
+        >
+          <span className="text-primary">♪</span>
+          <span>CornerList</span>
         </Link>
 
         <nav className="flex items-center gap-6">
