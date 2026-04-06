@@ -32,9 +32,9 @@ export async function POST(request: Request) {
       });
 
     if (uploadErr) {
-      console.error(uploadErr);
+      console.error("[dj-media upload]", uploadErr);
       return NextResponse.json(
-        { error: "Upload failed. Is the dj-media bucket configured?" },
+        { error: `Upload failed: ${uploadErr.message}` },
         { status: 500 }
       );
     }
