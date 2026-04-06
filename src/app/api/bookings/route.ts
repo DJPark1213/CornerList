@@ -124,15 +124,44 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Reject past dates
+    const today = new Date().toISOString().slice(0, 10);
+    if (eventDate < today) {
+      return NextResponse.json(
+        { error: "Event date cannot be in the past" },
+        { status: 422 }
+      );
+    }
+
+    // Validate start < end (no zero- or negative-duration bookings)
+    const toMinutes = (t: string) => {
+      const parts = t.split(":").map(Number);
+      return (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
+    };
+    if (toMinutes(endTime) <= toMinutes(startTime)) {
+      return NextResponse.json(
+        { error: "End time must be after start time" },
+        { status: 422 }
+      );
+    }
+
     const { data: djRow, error: djErr } = await supabase
       .from("dj_profiles")
-      .select("id")
+      .select("id, user_id")
       .eq("id", djId)
       .eq("is_active", true)
       .maybeSingle();
 
     if (djErr || !djRow) {
       return NextResponse.json({ error: "DJ not found" }, { status: 404 });
+    }
+
+    // Prevent a DJ from booking themselves
+    if (djRow.user_id === user.id) {
+      return NextResponse.json(
+        { error: "You cannot book yourself" },
+        { status: 422 }
+      );
     }
 
     const { data: booking, error: insErr } = await supabase

@@ -42,14 +42,23 @@ export async function POST(request: NextRequest) {
       const session = event.data.object as Stripe.Checkout.Session;
       const bookingId = session.metadata?.bookingId;
       if (bookingId) {
-        await admin
+        // Idempotency: skip if already confirmed/paid
+        const { data: existing } = await admin
           .from("bookings")
-          .update({
-            status: "confirmed",
-            payment_status: "paid",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", bookingId);
+          .select("status, payment_status")
+          .eq("id", bookingId)
+          .maybeSingle();
+
+        if (existing?.payment_status !== "paid") {
+          await admin
+            .from("bookings")
+            .update({
+              status: "confirmed",
+              payment_status: "paid",
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", bookingId);
+        }
 
         const { data: booking } = await admin
           .from("bookings")
