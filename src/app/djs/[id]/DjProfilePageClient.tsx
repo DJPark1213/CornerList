@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { Dj, Review } from "@/types/dj";
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export default function DjProfilePageClient({ dj, reviews }: Props) {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const autoPayBookingId = searchParams.get("pay");
   const [bookingOpen, setBookingOpen] = useState(false);
@@ -75,8 +77,7 @@ export default function DjProfilePageClient({ dj, reviews }: Props) {
         <ReviewForm
           djId={dj.id}
           onReviewSubmitted={() => {
-            // Reload reviews from server by refreshing
-            window.location.reload();
+            router.refresh();
           }}
         />
         <DjReviewsSection reviews={reviewList} />
