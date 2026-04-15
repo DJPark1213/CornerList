@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type DjBooking = {
   id: string;
@@ -31,6 +32,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function DjBookingsSection({ initial }: { initial: DjBooking[] }) {
+  const router = useRouter();
   const [bookings, setBookings] = useState(initial);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +49,7 @@ export default function DjBookingsSection({ initial }: { initial: DjBooking[] })
       });
       const j = (await res.json()) as { error?: string; status?: string };
       if (!res.ok) throw new Error(j.error ?? "Failed");
+      // Optimistic update
       setBookings((prev) =>
         prev.map((b) =>
           b.id === id
@@ -61,8 +64,12 @@ export default function DjBookingsSection({ initial }: { initial: DjBooking[] })
             : b
         )
       );
+      // Re-sync with server to ensure local state never goes stale
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
+      // Refresh even on error so stale "Pending" buttons don't persist
+      router.refresh();
     } finally {
       setBusyId(null);
     }

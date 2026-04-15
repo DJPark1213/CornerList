@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/admin/djs/[id]/route.ts)",
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/admin/users/[id]/route.ts)",
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/djs/[id]/route.ts)",
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/bookings/[id]/route.ts)",
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/djs/[id]/reviews/route.ts)",
+      "Bash(cat /c/Users/1213d/Documents/GitHub/CornerList/src/app/api/dj-media/[id]/route.ts)"
+    ]
+  }
+}

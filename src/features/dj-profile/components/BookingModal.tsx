@@ -177,6 +177,11 @@ export default function BookingModal({ dj, open, onClose }: Props) {
                 />
               </div>
             </div>
+            {startTime && endTime && endTime <= startTime && (
+              <p className="text-xs text-muted">
+                End time is next day (past midnight).
+              </p>
+            )}
 
             <div>
               <label className="mb-1 block text-xs font-medium text-muted">

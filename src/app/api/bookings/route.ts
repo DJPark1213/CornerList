@@ -133,14 +133,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate start < end (no zero- or negative-duration bookings)
-    const toMinutes = (t: string) => {
-      const parts = t.split(":").map(Number);
-      return (parts[0] ?? 0) * 60 + (parts[1] ?? 0);
-    };
-    if (toMinutes(endTime) <= toMinutes(startTime)) {
+    // Reject zero-duration bookings; end < start is fine (crosses midnight into next day)
+    if (startTime === endTime) {
       return NextResponse.json(
-        { error: "End time must be after start time" },
+        { error: "Start and end time cannot be the same" },
         { status: 422 }
       );
     }
