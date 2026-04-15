@@ -48,31 +48,32 @@ export default function DjProfilePageClient({ dj, reviews }: Props) {
           availabilitySummary={dj.availabilitySummary}
         />
 
-        <section>
-          <h2 className="text-lg font-semibold text-foreground">Showcase</h2>
-          <div className="mt-3 grid grid-cols-3 gap-3">
-            {dj.showcaseImages.length > 0 ? (
-              dj.showcaseImages.map((src, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={`${src}-${i}`}
-                  src={src}
-                  alt=""
-                  className="aspect-video w-full rounded-lg border border-border object-cover"
-                />
-              ))
-            ) : (
-              [1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="flex aspect-video items-center justify-center rounded-lg border border-border bg-surface text-sm text-muted/40"
-                >
-                  Media {i}
-                </div>
-              ))
-            )}
-          </div>
-        </section>
+        {dj.showcaseMedia.length > 0 && (
+          <section>
+            <h2 className="text-lg font-semibold text-foreground">Showcase</h2>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {dj.showcaseMedia.map((item) =>
+                item.type === "image" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={item.id}
+                    src={item.url}
+                    alt=""
+                    className="aspect-video w-full rounded-lg border border-border object-cover"
+                  />
+                ) : (
+                  <video
+                    key={item.id}
+                    src={item.url}
+                    controls
+                    playsInline
+                    className="aspect-video w-full rounded-lg border border-border object-cover"
+                  />
+                )
+              )}
+            </div>
+          </section>
+        )}
 
         <ReviewForm
           djId={dj.id}

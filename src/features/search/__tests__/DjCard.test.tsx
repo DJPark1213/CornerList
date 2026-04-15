@@ -16,7 +16,7 @@ const baseDj: Dj = {
   equipmentSummary: "Pioneer CDJs",
   availabilitySummary: "Weekends",
   location: "New York, NY",
-  showcaseImages: [],
+  showcaseMedia: [],
 };
 
 describe("DjCard", () => {

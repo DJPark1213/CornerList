@@ -134,11 +134,11 @@ export default function JoinDjWizard() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
       <h1 className="text-3xl font-bold tracking-tight">
-        Join CornerList as a DJ
+        Join CornerList as an Artist
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Tell us about your experience and style. You can adjust everything later
-        in your profile.
+        Tell us about your act and style. You can adjust everything later in
+        your profile.
       </p>
 
       <div className="mt-6">
@@ -169,7 +169,7 @@ export default function JoinDjWizard() {
               <input
                 value={form.stageName}
                 onChange={(e) => set({ stageName: e.target.value })}
-                placeholder="e.g. DJ Mike Beats"
+                placeholder="e.g. DJ Mike Beats or The Jazz Trio"
                 className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
               />
             </div>
@@ -263,8 +263,8 @@ export default function JoinDjWizard() {
                 Profile picture
               </label>
               <p className="mb-4 text-xs text-muted">
-                Upload a photo of yourself DJing or a professional headshot.
-                This is what hosts see first.
+                Upload a photo of yourself performing or a professional
+                headshot. This is what hosts see first.
               </p>
 
               <div className="flex flex-col items-center gap-4">
@@ -332,7 +332,7 @@ export default function JoinDjWizard() {
                 rows={5}
                 value={form.about}
                 onChange={(e) => set({ about: e.target.value })}
-                placeholder="Tell hosts about yourself, your style, and what makes your sets special..."
+                placeholder="Tell hosts about yourself, your style, and what makes your act special..."
                 className="w-full rounded-lg border border-border bg-surface-light px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
               />
             </div>
@@ -360,7 +360,7 @@ export default function JoinDjWizard() {
                   )}
                   <div>
                     <h4 className="font-semibold text-foreground">
-                      {form.stageName || "Your DJ Name"}
+                      {form.stageName || "Your Artist Name"}
                     </h4>
                     <p className="mt-0.5 text-xs text-muted">
                       {form.yearsExperience

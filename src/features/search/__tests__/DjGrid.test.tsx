@@ -31,7 +31,7 @@ const makeDj = (id: string, name: string): Dj => ({
   equipmentSummary: "gear",
   availabilitySummary: "weekends",
   avatarUrl: null,
-  showcaseImages: [],
+  showcaseMedia: [],
 });
 
 describe("DjGrid", () => {

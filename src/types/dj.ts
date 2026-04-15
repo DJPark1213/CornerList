@@ -21,7 +21,7 @@ export type Dj = {
   availabilitySummary: string;
   location: string;
   avatarUrl: string | null;
-  showcaseImages: string[];
+  showcaseMedia: { id: string; type: "image" | "video"; url: string }[];
 };
 
 export type Review = {

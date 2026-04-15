@@ -16,7 +16,7 @@ const mockDj: Dj = {
   equipmentSummary: "gear",
   availabilitySummary: "weekends",
   avatarUrl: null,
-  showcaseImages: [],
+  showcaseMedia: [],
 };
 
 describe("DjProfileHeader", () => {

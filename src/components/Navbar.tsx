@@ -163,7 +163,7 @@ export default function Navbar() {
           )}
           {role !== "dj" && role !== "admin" && (
             <Link href="/join-dj" className={linkClass("/join-dj")}>
-              Join as a DJ
+              Join as a Performer
             </Link>
           )}
           <Link href="/faq" className={linkClass("/faq")}>

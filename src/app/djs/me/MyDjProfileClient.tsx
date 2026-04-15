@@ -12,6 +12,7 @@ import {
   DjReviewsSection,
 } from "@/features/dj-profile";
 import DjBookingsSection from "./DjBookingsSection";
+import DjMediaSection from "./DjMediaSection";
 
 const ALL_GENRES: Genre[] = [
   "Hip-Hop",
@@ -36,6 +37,8 @@ type DjBooking = {
   host_name: string | null;
 };
 
+type ShowcaseMediaItem = { id: string; type: "image" | "video"; url: string };
+
 type Props = {
   dj: Dj;
   reviews: Review[];
@@ -43,6 +46,7 @@ type Props = {
   stripeConnected: boolean;
   stripeDetailsSubmitted: boolean;
   djBookings: DjBooking[];
+  showcaseMedia: ShowcaseMediaItem[];
 };
 
 type EditForm = {
@@ -58,7 +62,7 @@ type EditForm = {
   profileImage: string | null;
 };
 
-export default function MyDjProfileClient({ dj, reviews, contactEmail, stripeConnected, stripeDetailsSubmitted, djBookings }: Props) {
+export default function MyDjProfileClient({ dj, reviews, contactEmail, stripeConnected, stripeDetailsSubmitted, djBookings, showcaseMedia }: Props) {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [connectingStripe, setConnectingStripe] = useState(false);
@@ -447,6 +451,7 @@ export default function MyDjProfileClient({ dj, reviews, contactEmail, stripeCon
           equipmentSummary={currentDj.equipmentSummary}
           availabilitySummary={currentDj.availabilitySummary}
         />
+        <DjMediaSection initial={showcaseMedia} />
         <DjReviewsSection reviews={reviews} />
 
         {/* Booking requests received */}

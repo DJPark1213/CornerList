@@ -43,13 +43,13 @@ export default function SearchHero() {
         <h1 className="max-w-2xl text-4xl font-bold leading-tight tracking-tight md:text-5xl">
           Book the{" "}
           <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Perfect DJ
+            Perfect Entertainment
           </span>{" "}
           for Your Event.
         </h1>
         <p className="mt-4 max-w-xl text-base text-muted md:text-lg">
-          Discover verified DJs for frat parties, bar nights, formals, and
-          campus events in Charlottesville.
+          Discover verified DJs, bands, and live acts for frat parties, bar
+          nights, formals, and campus events in Charlottesville.
         </p>
 
         {/* Airbnb-style search bar (budget filter lives on /search only) */}
@@ -57,7 +57,7 @@ export default function SearchHero() {
           {/* Name / Genre */}
           <div className="flex-1 border-b border-border px-5 py-3 md:border-b-0 md:border-r">
             <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted">
-              DJ or Genre
+              Artist or Genre
             </label>
             <div className="mt-0.5 flex items-center gap-2">
               <input
