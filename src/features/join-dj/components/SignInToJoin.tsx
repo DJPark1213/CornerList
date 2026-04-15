@@ -16,9 +16,9 @@ export default function SignInToJoin() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-20 text-center">
-      <h1 className="text-3xl font-bold tracking-tight">Join CornerList as a DJ</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Join CornerList as an Artist</h1>
       <p className="mt-3 text-sm text-muted">
-        You need to sign in before creating your DJ profile.
+        You need to sign in before creating your artist profile.
       </p>
       <button
         onClick={handleSignIn}

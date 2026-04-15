@@ -49,6 +49,32 @@ export async function POST(request: Request) {
         .from("profiles")
         .update({ avatar_url: publicUrl })
         .eq("id", user.id);
+    } else if (type === "image" || type === "video") {
+      // Get the DJ profile id for this user
+      const { data: djRow } = await supabase
+        .from("dj_profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (djRow) {
+        const { data: asset, error: assetErr } = await supabase
+          .from("media_assets")
+          .insert({
+            dj_id: djRow.id,
+            type,
+            storage_path: path,
+            public_url: publicUrl,
+          })
+          .select("id")
+          .single();
+
+        if (assetErr) {
+          console.error("[dj-media insert]", assetErr);
+        } else {
+          return NextResponse.json({ url: publicUrl, path, id: asset.id });
+        }
+      }
     }
 
     return NextResponse.json({ url: publicUrl, path });

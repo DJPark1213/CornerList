@@ -59,16 +59,16 @@ function mapListRow(row: DjProfileListRow): Dj {
     availabilitySummary: row.availability_summary ?? "",
     location: row.location ?? "",
     avatarUrl: row.profiles?.avatar_url ?? null,
-    showcaseImages: [],
+    showcaseMedia: [],
   };
 }
 
 function mapDetailRow(row: DjProfileDetailRow): Dj {
   const base = mapListRow(row);
-  const images = (row.media_assets ?? [])
-    .filter((m) => m.type === "image" && m.public_url)
-    .map((m) => m.public_url as string);
-  return { ...base, showcaseImages: images };
+  const media = (row.media_assets ?? [])
+    .filter((m) => (m.type === "image" || m.type === "video") && m.public_url)
+    .map((m) => ({ id: m.id, type: m.type as "image" | "video", url: m.public_url as string }));
+  return { ...base, showcaseMedia: media };
 }
 
 export type ListDjsParams = {

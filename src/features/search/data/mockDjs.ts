@@ -15,7 +15,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Weekends (Fri–Sun), some weeknights",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
   {
     id: "emma-vibe",
@@ -31,7 +31,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Fri & Sat evenings only",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
   {
     id: "dynamic-d",
@@ -48,7 +48,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Available most days, book 2 weeks in advance",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
   {
     id: "luna-bass",
@@ -64,7 +64,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Weekdays and weekends, flexible schedule",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
   {
     id: "rico-flame",
@@ -81,7 +81,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Thu–Sat, also available for Sunday day events",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
   {
     id: "kaz-wave",
@@ -98,7 +98,7 @@ export const MOCK_DJS: Dj[] = [
     availabilitySummary: "Weekends preferred, weekdays negotiable",
     location: "Charlottesville, VA",
     avatarUrl: null,
-    showcaseImages: [],
+    showcaseMedia: [],
   },
 ];
 

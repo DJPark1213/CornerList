@@ -78,6 +78,7 @@ export default async function MyDjProfilePage() {
       stripeConnected={stripeConnected}
       stripeDetailsSubmitted={stripeDetailsSubmitted}
       djBookings={djBookings}
+      showcaseMedia={result.dj.showcaseMedia}
     />
   );
 }
